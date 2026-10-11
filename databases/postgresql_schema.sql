@@ -1,0 +1,3 @@
+-- PostgreSQL Schema for Netflix Architecture
+-- User tables, video tables, subscription tables
+-- To be implemented
