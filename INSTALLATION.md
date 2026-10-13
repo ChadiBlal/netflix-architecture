@@ -1,4 +1,4 @@
-# Netflix Architecture Project - PostgreSQL Installation Guide
+# Netflix Architecture Project Installation Guide
 
 **For all team members: Follow these steps EXACTLY to ensure everyone has the same setup.**
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This guide covers installing and configuring **PostgreSQL** - the relational database for user accounts, subscriptions, and billing.
+This guide covers installing and configuring **PostgreSQL** , **MongoDB** , **Redis**
 
 **Important:** Create a folder structure to keep everything organized:
 ```
