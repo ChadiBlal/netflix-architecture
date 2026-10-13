@@ -219,6 +219,54 @@ Netflix/
 
 ---
 
+## 2. MongoDB & Standalone Shell Installation (NoSQL)
+
+### 2.1 Server Engine Installation
+* Download the official **MongoDB Community Server MSI** package using this link:
+  👉 [Download MongoDB Community Server (Windows MSI)](https://mongodb.com)
+  *(Make sure Version is set to 9.0.x, Platform is Windows, and Package is MSI)*
+* Run the setup wizard, select **Complete**, and ensure **MongoDB Compass** is checked.
+* Finish the installation wizard.
+
+### 2.2 Custom Storage Partition Migration (Freeing Up 2.4GB on C:\)
+If your main Windows drive is low on storage space, relocate the application files to another drive partition (e.g., `D:\` or `E:\`) via an administrative directory junction shortcut:
+1. Open **Command Prompt as Administrator** and stop the engine:
+   ```bash
+   net stop MongoDB
+   ```
+2. Navigate to `C:\Program Files\`, **Cut** the entire `MongoDB` folder, and **Paste** it into your custom drive path (e.g., `D:\Netflix\`).
+3. Run this exact shortcut creation command in your Administrator terminal:
+   ```cmd
+   mklink /J "C:\Program Files\MongoDB" "D:\Netflix\MongoDB"
+   ```
+4. Turn the engine background service back online:
+   ```bash
+   net start MongoDB
+   ```
+
+### 2.3 Standalone Shell Component Setup (`mongosh`)
+* ⚠️ **Crucial Note**: Modern MongoDB server packages no longer bundle the command line terminal shortcut natively. You **MUST** download it separately.
+* Download the standalone **MongoDB Shell MSI installer package** using this link:
+  👉 [Download Standalone MongoDB Shell (Windows MSI)](https://mongodb.com)
+  *(Ensure Platform is Windows 64-bit and Package is MSI)*
+* Run the installer wizard and **explicitly change its installation destination directory** to point directly to your system directory binaries folder:
+  ```text
+  D:\Netflix\MongoDB\Server\9.0\bin\
+  ```
+
+### 2.4 Environment Variables Configuration (PATH)
+* Open Windows **Environment Variables** (`sysdm.cpl`).
+* Add this absolute path location directly into your **System Path variable list**:
+  ```text
+  D:\Netflix\MongoDB\Server\9.0\bin
+  ```
+
+### 2.5 Verification Command
+* Open a fresh terminal window and test the shell connection directly:
+  ```bash
+  mongosh --version
+  ```
+
 ## Next Steps
 
 1. ✅ PostgreSQL installed and verified
