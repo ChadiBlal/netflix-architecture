@@ -18,14 +18,6 @@ Netflix/
 
 You can place this `Netflix/` folder anywhere on your computer (C:, D:, or E: drive - doesn't matter).
 
----
-
-## Prerequisites
-
-- Windows 10 or Windows 11
-- Administrator access
-- At least 2GB free space on your hard drive
-- Internet connection
 
 ---
 
@@ -53,10 +45,7 @@ You can place this `Netflix/` folder anywhere on your computer (C:, D:, or E: dr
 3. Create a folder called: `Netflix`
 4. Inside `Netflix`, create a subfolder called: `PostgreSQL`
 
-**Example paths (pick ONE):**
-- `C:\Netflix\PostgreSQL` (Windows C: drive)
-- `D:\Netflix\PostgreSQL` (External drive D:)
-- `E:\Netflix\PostgreSQL` (External drive E:)
+
 
 Now when the installer asks for the installation directory, use the path you created above.
 
@@ -165,118 +154,50 @@ Now when the installer asks for the installation directory, use the path you cre
 
 ---
 
-## Verification Checklist
+## Part 2: MongoDB Installation (NoSQL Engine)
 
-**After completing PostgreSQL installation, verify everything works:**
+### Step 2.1: Download the Database Engine
+1. Go to: https://www.mongodb.com/try/download/community
+2. Click Select Package
+3. Ensure the following settings are selected: 
+   * **Version**: `9.0.x` (Current Stable)
+   * **Platform**: `Windows`
+   * **Package**: `MSI`
+4. Click **Download** to save the setup file.
 
-- [ ] PostgreSQL: `psql --version` returns version number
-- [ ] PostgreSQL: Can connect with `psql -U postgres`
-- [ ] PostgreSQL service is running in Windows Services
+### Step 2.2: Setup & Directory Alignment
+**BEFORE running the setup file, create a folder called `MongoDB` inside your master `Netflix/` folder:**
+1. Open Windows File Explorer and navigate to your `Netflix/` folder.
+2. Create a clean subfolder named: `MongoDB`
+3. Run the installer wizard, accept the agreement conditions, and click **Next**.
+4. Choose the **Custom** installation type when prompted.
+5. Click the **Browse** button next to the installation path field, and change it to point directly to your folder:
+   *Example: `D:\Netflix\MongoDB` (or whatever drive you chose).*
+6. Ensure **"Install MongoDB as a Service"** and **"Install MongoDB Compass"** are both checked. Click **Next**, click **Install**, and then select **Finish**.
 
----
+### Step 2.3: Standalone Shell Tool Configuration (`mongosh`)
+*⚠️ **Important**: Modern MongoDB server packages no longer bundle the interactive terminal shell (`mongosh`) natively. You must download it separately to run database terminal commands.*
 
-## Basic PostgreSQL Commands (Reference)
+1. Go to: https://www.mongodb.com/try/download/shell
+2. Ensure the **Platform** is set to **Windows 64-bit (10+)** and the **Package** type is set to **MSI**. Click **Download**.
+3. Run the installer package and click **Next**.
+4. When the installer wizard asks for the installation directory, click **Browse** and force it to drop the utility files directly into the core binaries path you used in step 2.2:
+   `D:\Netflix\MongoDB\Server\9.0\bin\` *(make sure to adjust the starting drive letter to match your Netflix folder).*
+5. Complete the setup wizard by clicking **Install** and then **Finish**.
 
-```bash
-# Connect to PostgreSQL
-psql -U postgres
+### Step 2.4: Update Environment Variables (PATH)
+1. Press **Windows Key + R**, type `sysdm.cpl`, and press **Enter**.
+2. Click the **Environment Variables** button (bottom right).
+3. Under "System variables", select the **Path** option and click **Edit**.
+4. Click **New** and add the absolute path pointing to your MongoDB binaries folder:
+   `D:\Netflix\MongoDB\Server\9.0\bin` *(make sure to adjust the starting drive letter to match your Netflix folder).*
+5. Click **OK** on all active prompts to save configurations.
 
-# Exit PostgreSQL
-\q
-```
-
----
-
-## Troubleshooting
-
-### PostgreSQL won't connect
-- Check if service is running: Open Windows Services, look for PostgreSQL
-- Verify password is correct (set during installation)
-- Make sure port 5432 is not blocked
-
-### Commands not found (psql is not recognized)
-- Make sure PATH was added correctly to your Netflix\PostgreSQL\bin folder
-- Restart Command Prompt after adding PATH
-- Check that your PostgreSQL folder path is correct
-
-### Can't create tables
-- Make sure you connected to the `netflix_db` database with `\c netflix_db`
-- Verify you pasted the entire SQL code from `postgresql_schema.sql`
-- Check for any error messages and ask your team lead
-
----
-
-## Your Folder Structure
-
-After PostgreSQL installation, your folders should look like this:
-
-```
-Netflix/
-├── PostgreSQL/          ← PostgreSQL software & data (you just installed this)
-├── MongoDB/             ← For future use
-└── Redis/               ← For future use
-```
-
----
-
-## 2. MongoDB & Standalone Shell Installation (NoSQL)
-
-### 2.1 Server Engine Installation
-* Download the official **MongoDB Community Server MSI** package using this link:
-  👉 [Download MongoDB Community Server (Windows MSI)](https://mongodb.com)
-  *(Make sure Version is set to 9.0.x, Platform is Windows, and Package is MSI)*
-* Run the setup wizard, select **Complete**, and ensure **MongoDB Compass** is checked.
-* Finish the installation wizard.
-
-### 2.2 Custom Storage Partition Migration (Freeing Up 2.4GB on C:\)
-If your main Windows drive is low on storage space, relocate the application files to another drive partition (e.g., `D:\` or `E:\`) via an administrative directory junction shortcut:
-1. Open **Command Prompt as Administrator** and stop the engine:
+### Step 2.5: Final Shell Verification
+1. Close all open Command Prompt windows and open a **brand-new Command Prompt**.
+2. Run this evaluation verification command:
    ```bash
-   net stop MongoDB
+   mongosh --version
    ```
-2. Navigate to `C:\Program Files\`, **Cut** the entire `MongoDB` folder, and **Paste** it into your custom drive path (e.g., `D:\Netflix\`).
-3. Run this exact shortcut creation command in your Administrator terminal:
-   ```cmd
-   mklink /J "C:\Program Files\MongoDB" "D:\Netflix\MongoDB"
-   ```
-4. Turn the engine background service back online:
-   ```bash
-   net start MongoDB
-   ```
+   *(If it returns a version number string like `2.13.x`, your local shell tool can talk to the database service cleanly!)*
 
-### 2.3 Standalone Shell Component Setup (`mongosh`)
-* ⚠️ **Crucial Note**: Modern MongoDB server packages no longer bundle the command line terminal shortcut natively. You **MUST** download it separately.
-* Download the standalone **MongoDB Shell MSI installer package** using this link:
-  👉 [Download Standalone MongoDB Shell (Windows MSI)](https://mongodb.com)
-  *(Ensure Platform is Windows 64-bit and Package is MSI)*
-* Run the installer wizard and **explicitly change its installation destination directory** to point directly to your system directory binaries folder:
-  ```text
-  D:\Netflix\MongoDB\Server\9.0\bin\
-  ```
-
-### 2.4 Environment Variables Configuration (PATH)
-* Open Windows **Environment Variables** (`sysdm.cpl`).
-* Add this absolute path location directly into your **System Path variable list**:
-  ```text
-  D:\Netflix\MongoDB\Server\9.0\bin
-  ```
-
-### 2.5 Verification Command
-* Open a fresh terminal window and test the shell connection directly:
-  ```bash
-  mongosh --version
-  ```
-
-## Next Steps
-
-1. ✅ PostgreSQL installed and verified
-2. ⏳ Database schema design (Presentation 3)
-3. ⏳ Create database and tables (Presentation 3)
-4. ⏳ Run Python data generation scripts
-5. ⏳ Install MongoDB and Redis (when team is ready)
-6. ⏳ Set up Node.js/Express backend
-7. ⏳ Build frontend UI
-
----
-
-**Questions? Ask your team lead or check the main README.md**
