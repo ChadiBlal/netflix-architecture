@@ -201,3 +201,49 @@ Now when the installer asks for the installation directory, use the path you cre
    ```
    *(If it returns a version number string like `2.13.x`, your local shell tool can talk to the database service cleanly!)*
 
+## Part 3: Redis Installation (In-Memory Caching Layer)
+
+### Step 3.1: Download the Redis Archive
+* Go to: https://github.com/tporadowski/redis/releases
+* Under assets download the clean, native Windows executable `.zip` distribution archive.
+* *Recommended package version*: `Redis-x64-5.0.14.1.zip`
+
+### Step 3.2: Setup & Directory Alignment
+**BEFORE extracting any compressed data, create a folder called `Redis` inside your `Netflix/` folder:**
+1. Open Windows File Explorer and navigate straight inside your unified `Netflix/` workspace directory.
+2. Create a clean subfolder named exactly: `Redis`
+3. Extract all content from your downloaded `.zip` file directly into this new path:
+   *Example target destination: `D:\Netflix\Redis\` (adjust drive letter to match your workspace).*
+4. Extract the .zip file inside the Redis folder that you created.
+
+### Step 3.3: Configure Windows Environment Variables (PATH)
+1. Press `Windows Key + R`, type `sysdm.cpl`, and hit Enter.
+2. Navigate to **Advanced** -> **Environment Variables**.
+3. Under **System variables** (bottom section), select **Path** and click **Edit**.
+4. Click **New** and add your explicit binary path location:
+   ```text
+   D:\Netflix\Redis
+   ```
+   *(Adjust starting drive letter to match your master folder location).*
+5. Click **OK** on all prompt blocks to save configurations.
+
+### Step 3.4: Verification & Execution Terminal Check
+1. Open a **NEW Command Prompt** window, switch to your target drive partition, and navigate into your workspace:
+   ```bash
+   D:
+   cd D:\Netflix\Redis
+   ```
+2. Turn on the cache system database server engine using our local configurations:
+   ```bash
+   redis-server redis.windows.conf
+   ```
+3. Open a **second separate Command Prompt window** while leaving the server running, and check structural latency connection flags using the client terminal command utility:
+   ```bash
+   redis-cli
+   ```
+4. Run the ping tracking validation string check:
+   ```text
+   ping
+   ```
+   *(If it immediately returns a sharp **`PONG`** response statement, your memory cache layer is completely synchronized and functional!)*
+
