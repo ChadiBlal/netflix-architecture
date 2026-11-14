@@ -6,17 +6,26 @@
 
 ## Overview
 
-This guide covers installing and configuring **PostgreSQL** , **MongoDB** , **Redis**
+This guide covers setting up everything you need to run the project on **Windows**:
+
+| Part | Tool | How it runs |
+|---|---|---|
+| 1 | **PostgreSQL** (relational database) | Installed natively on Windows |
+| 2 | **Redis** (in-memory cache) | Installed natively on Windows |
+| 3 | **Docker Desktop** and **Node.js** | Tools you install once |
+| 4 | **Kafka, ZooKeeper, Cassandra, Flink and the Zuul gateway** | Run in Docker with one command (`docker-compose.yml`) |
+| 5 | Daily start-up checklist and troubleshooting | |
 
 **Important:** Create a folder structure to keep everything organized:
 ```
 Netflix/
 ├── PostgreSQL/          ← PostgreSQL software & data (you'll create this)
-├── MongoDB/             ← For future use
-└── Redis/               ← For future use
+└── Redis/               ← Redis (you'll create this)
 ```
 
 You can place this `Netflix/` folder anywhere on your computer (C:, D:, or E: drive - doesn't matter).
+
+The project code itself comes from the GitHub repository (see `README.md`), not from this folder.
 
 
 ---
@@ -118,9 +127,9 @@ Now when the installer asks for the installation directory, use the path you cre
 7. Click **New**
 8. Add the path to your PostgreSQL bin folder:
    ```
-   C:\Netflix\PostgreSQL\bin
+   D:\Netflix\PostgreSQL\bin
    ```
-   (Or replace C: with whatever drive you used: D:\Netflix\PostgreSQL\bin, etc.)
+   (Replace the starting drive letter `D:` with the drive where your `Netflix/` folder is.)
 
 9. Click **OK** → **OK** → **OK**
 
@@ -154,61 +163,14 @@ Now when the installer asks for the installation directory, use the path you cre
 
 ---
 
-## Part 2: MongoDB Installation (NoSQL Engine)
+## Part 2: Redis Installation (In-Memory Caching Layer)
 
-### Step 2.1: Download the Database Engine
-1. Go to: https://www.mongodb.com/try/download/community
-2. Click Select Package
-3. Ensure the following settings are selected: 
-   * **Version**: `9.0.x` (Current Stable)
-   * **Platform**: `Windows`
-   * **Package**: `MSI`
-4. Click **Download** to save the setup file.
-
-### Step 2.2: Setup & Directory Alignment
-**BEFORE running the setup file, create a folder called `MongoDB` inside your master `Netflix/` folder:**
-1. Open Windows File Explorer and navigate to your `Netflix/` folder.
-2. Create a clean subfolder named: `MongoDB`
-3. Run the installer wizard, accept the agreement conditions, and click **Next**.
-4. Choose the **Custom** installation type when prompted.
-5. Click the **Browse** button next to the installation path field, and change it to point directly to your folder:
-   *Example: `D:\Netflix\MongoDB` (or whatever drive you chose).*
-6. Ensure **"Install MongoDB as a Service"** and **"Install MongoDB Compass"** are both checked. Click **Next**, click **Install**, and then select **Finish**.
-
-### Step 2.3: Standalone Shell Tool Configuration (`mongosh`)
-*⚠️ **Important**: Modern MongoDB server packages no longer bundle the interactive terminal shell (`mongosh`) natively. You must download it separately to run database terminal commands.*
-
-1. Go to: https://www.mongodb.com/try/download/shell
-2. Ensure the **Platform** is set to **Windows 64-bit (10+)** and the **Package** type is set to **MSI**. Click **Download**.
-3. Run the installer package and click **Next**.
-4. When the installer wizard asks for the installation directory, click **Browse** and force it to drop the utility files directly into the core binaries path you used in step 2.2:
-   `D:\Netflix\MongoDB\Server\9.0\bin\` *(make sure to adjust the starting drive letter to match your Netflix folder).*
-5. Complete the setup wizard by clicking **Install** and then **Finish**.
-
-### Step 2.4: Update Environment Variables (PATH)
-1. Press **Windows Key + R**, type `sysdm.cpl`, and press **Enter**.
-2. Click the **Environment Variables** button (bottom right).
-3. Under "System variables", select the **Path** option and click **Edit**.
-4. Click **New** and add the absolute path pointing to your MongoDB binaries folder:
-   `D:\Netflix\MongoDB\Server\9.0\bin` *(make sure to adjust the starting drive letter to match your Netflix folder).*
-5. Click **OK** on all active prompts to save configurations.
-
-### Step 2.5: Final Shell Verification
-1. Close all open Command Prompt windows and open a **brand-new Command Prompt**.
-2. Run this evaluation verification command:
-   ```bash
-   mongosh --version
-   ```
-   *(If it returns a version number string like `2.13.x`, your local shell tool can talk to the database service cleanly!)*
-
-## Part 3: Redis Installation (In-Memory Caching Layer)
-
-### Step 3.1: Download the Redis Archive
+### Step 2.1: Download the Redis Archive
 * Go to: https://github.com/tporadowski/redis/releases
 * Under assets download the clean, native Windows executable `.zip` distribution archive.
 * *Recommended package version*: `Redis-x64-5.0.14.1.zip`
 
-### Step 3.2: Setup & Directory Alignment
+### Step 2.2: Setup & Directory Alignment
 **BEFORE extracting any compressed data, create a folder called `Redis` inside your `Netflix/` folder:**
 1. Open Windows File Explorer and navigate straight inside your unified `Netflix/` workspace directory.
 2. Create a clean subfolder named exactly: `Redis`
@@ -216,7 +178,7 @@ Now when the installer asks for the installation directory, use the path you cre
    *Example target destination: `D:\Netflix\Redis\` (adjust drive letter to match your workspace).*
 4. Extract the .zip file inside the Redis folder that you created.
 
-### Step 3.3: Configure Windows Environment Variables (PATH)
+### Step 2.3: Configure Windows Environment Variables (PATH)
 1. Press `Windows Key + R`, type `sysdm.cpl`, and hit Enter.
 2. Navigate to **Advanced** -> **Environment Variables**.
 3. Under **System variables** (bottom section), select **Path** and click **Edit**.
@@ -227,7 +189,7 @@ Now when the installer asks for the installation directory, use the path you cre
    *(Adjust starting drive letter to match your master folder location).*
 5. Click **OK** on all prompt blocks to save configurations.
 
-### Step 3.4: Verification & Execution Terminal Check
+### Step 2.4: Verification & Execution Terminal Check
 1. Open a **NEW Command Prompt** window, switch to your target drive partition, and navigate into your workspace:
    ```bash
    D:
@@ -247,3 +209,138 @@ Now when the installer asks for the installation directory, use the path you cre
    ```
    *(If it immediately returns a sharp **`PONG`** response statement, your memory cache layer is completely synchronized and functional!)*
 
+### Step 2.5: (Optional but recommended) Run Redis as a Windows service
+
+Without this, Redis only runs while the `redis-server` window is open, and the backend will fail with "connection refused" if you forget to start it.
+
+1. Close the window running `redis-server` (Ctrl + C).
+2. Open **Command Prompt as Administrator** and run:
+   ```bash
+   cd D:\Netflix\Redis
+   redis-server --service-install redis.windows.conf
+   redis-server --service-start
+   ```
+3. Check again with `redis-cli`, then `ping` (you should get `PONG`).
+
+From now on Redis starts automatically with Windows.
+
+✅ **Redis is now installed and working!**
+
+---
+
+## Part 3: Docker Desktop and Node.js
+
+### Step 3.1: Install Docker Desktop
+
+1. Go to: https://www.docker.com/products/docker-desktop/
+2. Download and run the Windows installer, keep the default options (WSL 2 backend).
+3. Restart your computer if the installer asks.
+4. Start **Docker Desktop** and wait until it says Docker is running.
+5. Open a **new Command Prompt** and check:
+   ```bash
+   docker --version
+   docker compose version
+   ```
+   *(On older Docker Desktop versions the second command is `docker-compose --version`. Use whichever works on your PC, and replace `docker compose` with `docker-compose` in the commands below.)*
+
+### Step 3.2: Install Node.js
+
+1. Go to: https://nodejs.org
+2. Download the **LTS** version for Windows and run the installer with the default options.
+3. Open a **new Command Prompt** and check:
+   ```bash
+   node --version
+   npm --version
+   ```
+
+✅ **Docker and Node.js are ready.**
+
+---
+
+## Part 4: Start the Docker Infrastructure (Kafka, Cassandra, Flink, Zuul)
+
+All of these run from the single file `docker-compose.yml` at the root of the repository.
+
+### Step 4.1: Get the project
+
+```bash
+git clone https://github.com/ChadiBlal/netflix-architecture.git
+cd netflix-architecture
+```
+
+### Step 4.2: (Optional) Choose where Cassandra stores its data
+
+By default Docker keeps Cassandra's data in a normal Docker volume, so you can skip this step.
+If you want the data in a specific folder, copy `.env.example` to `.env` and uncomment the `CASSANDRA_DATA` line with your own path.
+
+### Step 4.3: Start everything
+
+Make sure **Docker Desktop is running**, then:
+
+```bash
+docker compose up -d --build
+```
+
+- The **first run takes several minutes**: Docker downloads the images and builds the Zuul gateway.
+- Cassandra needs about a minute after starting before it accepts connections.
+
+### Step 4.4: Verify
+
+```bash
+docker compose ps
+```
+
+All services should show as running. Then check in your browser:
+
+| What | Address |
+|---|---|
+| Flink dashboard | http://localhost:8081 |
+| Zuul gateway health check | http://localhost:8080/healthcheck |
+
+### Useful commands
+
+| Goal | Command |
+|---|---|
+| Stop everything (data is kept) | `docker compose down` |
+| Start again | `docker compose up -d` |
+| See logs of one service | `docker compose logs -f kafka` |
+| Delete everything **including data** | `docker compose down -v` (careful!) |
+
+✅ **The infrastructure is running.**
+
+---
+
+## Part 5: Daily Start-up Checklist and Troubleshooting
+
+### Ports used by the project
+
+| Component | Address | Where it runs |
+|---|---|---|
+| Zuul API Gateway | `localhost:8080` | Docker |
+| Account Service | `localhost:5001` | Windows (Node.js) |
+| Playback & Catalogue Service | `localhost:5002` | Windows (Node.js) |
+| PostgreSQL | `localhost:5432` | Windows |
+| Redis | `localhost:6379` | Windows |
+| Kafka (from Windows) | `localhost:9092` | Docker |
+| Kafka (from inside Docker, e.g. Flink) | `kafka:19092` | Docker |
+| Cassandra | `localhost:9042` | Docker |
+| Flink dashboard | `localhost:8081` | Docker |
+
+### Start-up order
+
+1. Start **PostgreSQL** (it starts automatically with Windows after installation).
+2. Start **Redis** (automatic if you did Step 2.5, otherwise run `redis-server redis.windows.conf`).
+3. Start **Docker Desktop**, then run `docker compose up -d` in the repository.
+4. Start the two Node.js services (ports 5001 and 5002).
+5. Open the frontend.
+
+### Common problems
+
+| Problem | Likely cause and fix |
+|---|---|
+| Backend shows "connection refused" on port 6379 | Redis is not running. Start it (see start-up order). |
+| Backend cannot connect to PostgreSQL | Check the service is running and that you use the same password, port (5432) and database name as the team. |
+| `docker compose` fails immediately | Docker Desktop is not running. Start it and wait until it is ready. |
+| Request to `localhost:8080/api/...` returns a 5xx error | Zuul cannot reach your Node.js service. Check the service is running on port 5001 or 5002. Windows Firewall may also ask to allow Node.js, click **Allow**. |
+| Port already in use | Another program uses that port. Close it, or stop the container that uses it. |
+| Cassandra connection fails right after start | Wait about a minute and try again. |
