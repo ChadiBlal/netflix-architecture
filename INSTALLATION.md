@@ -209,7 +209,7 @@ Now when the installer asks for the installation directory, use the path you cre
    ```
    *(If it immediately returns a sharp **`PONG`** response statement, your memory cache layer is completely synchronized and functional!)*
 
-### Step 2.5: (Optional but recommended) Run Redis as a Windows service
+### Step 2.5: Run Redis as a Windows service
 
 Without this, Redis only runs while the `redis-server` window is open, and the backend will fail with "connection refused" if you forget to start it.
 
