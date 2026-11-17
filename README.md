@@ -6,15 +6,7 @@ An educational, Netflix-inspired platform that shows how different database and 
 
 ## Architecture
 
-```
-                       +--> Account Service (5001) ----> PostgreSQL
-Browser --> Zuul (8080)|                        \------> Redis (sessions, optional)
-                       +--> Playback & Catalogue Service (5002) --> PostgreSQL (catalogue)
-                                         |  \--> Redis (playback position)
-                                         |  \--> Local MP4 files (video delivery)
-                                         v
-                                       Kafka --> Flink --> Cassandra (viewing history)
-```
+![Netflix-inspired architecture: Client, Zuul gateway, Account & Billing and Streaming & Playback services, PostgreSQL, Redis, Kafka, Flink and Cassandra](docs/netflix_architecture.png)
 
 - **Transactional path (ACID):** registration, authentication, subscriptions, catalogue metadata -> PostgreSQL.
 - **High-velocity path (BASE):** playback progress events -> Kafka -> Flink -> Cassandra.
