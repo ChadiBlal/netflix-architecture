@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # --- NoSQL TIME-SERIES LAYER (Netflix Viewing History) ---
+  cassandra:
+    image: cassandra:5.0.5
+    container_name: netflix_cassandra
+    ports:
+      - "9042:9042"
+    volumes:
+      # Set CASSANDRA_DATA in a .env file to keep data on a specific folder (e.g. your D: drive).
+      # If it is not set, Docker uses a normal named volume, so the file works on any PC.
+      - ${CASSANDRA_DATA:-cassandra_data}:/var/lib/cassandra
+    networks:
+      - netflix_pipeline_network
+
+  # --- EVENT STREAMING LAYER (Kafka Message Queue) ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: netflix_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - netflix_pipeline_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: netflix_kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: netflix_zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - netflix_pipeline_network
+
+  # --- REAL-TIME STREAM PROCESSING LAYER (Apache Flink Engine) ---
+  flink-jobmanager:
+    image: flink:1.17-java11
+    container_name: netflix_flink_manager
+    ports:
+      - "8081:8081" # This opens the visual web dashboard for Flink!
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+    networks:
+      - netflix_pipeline_network
+
+  flink-taskmanager:
+    image: flink:1.17-java11
+    container_name: netflix_flink_worker
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 2
+    networks:
+      - netflix_pipeline_network
+
+  # --- API GATEWAY (real Netflix Zuul, built from source) ---
+  zuul-gateway:
+    build: ./zuul-real
+    container_name: netflix_zuul
+    ports:
+      - "8080:7001"   # frontend calls http://localhost:8080 (Zuul listens on 7001 inside)
+    restart: unless-stopped
+    networks:
+      - netflix_pipeline_network
+
+volumes:
+  cassandra_data:
+
+networks:
+  netflix_pipeline_network:
+    driver: bridge

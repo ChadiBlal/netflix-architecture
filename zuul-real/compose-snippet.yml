@@ -1,0 +1,9 @@
+# Paste under `services:` in your docker-compose.yml (already included in docker-compose.yml)
+  zuul-gateway:
+    build: ./zuul-real
+    container_name: netflix_zuul
+    ports:
+      - "8080:7001"     # frontend calls http://localhost:8080 (Zuul listens on 7001 inside)
+    restart: unless-stopped
+    networks:
+      - netflix_pipeline_network
