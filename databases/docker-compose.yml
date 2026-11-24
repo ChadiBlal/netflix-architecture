@@ -1,0 +1,28 @@
+# Single-node Cassandra for development.
+# Start:  docker compose up -d
+# Stop:   docker compose down        (add -v to also delete the data)
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: netflix-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: netflix-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      # Small heap so it runs on a student laptop
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+      - ./cql:/cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+volumes:
+  cassandra_data:
