@@ -10,9 +10,10 @@ RUN git clone --depth 1 --branch v4.1.10 https://github.com/Netflix/zuul.git .
 # Our routing rules + config replace the sample's
 COPY overrides/application.properties zuul-sample/src/main/resources/application.properties
 COPY overrides/Routes.java zuul-sample/src/main/java/com/netflix/zuul/sample/filters/inbound/Routes.java
-
+COPY overrides/OriginServerList.java zuul-sample/src/main/java/com/netflix/zuul/sample/filters/inbound/OriginServerList.java
 # Don't let strict compiler checks (-Werror) break the build on our small edit
 RUN sed -i '/-Werror/d' build.gradle
+RUN echo 'dependencies { implementation "com.netflix.ribbon:ribbon-eureka:${versions_ribbon}" }' >> zuul-sample/build.gradle
 RUN ./gradlew --no-daemon :zuul-sample:installDist -x test
 
 # ---- Stage 2: runtime ----

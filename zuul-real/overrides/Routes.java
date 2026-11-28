@@ -43,7 +43,8 @@ public class Routes extends HttpInboundSyncFilter {
             context.setRouteVIP("account");
         } else if (path.startsWith("/api/catalog")
                 || path.startsWith("/api/playback")
-                || path.startsWith("/videos")) {
+                || path.startsWith("/videos")
+                || path.startsWith("/api/streaming")) {
             context.setEndpoint(ProxyEndpoint.class.getCanonicalName());
             context.setRouteVIP("playback");
         } else {
