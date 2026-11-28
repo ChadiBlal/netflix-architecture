@@ -9,3 +9,7 @@ backend/streaming-playback-delivery/databases/
 backend/streaming-playback-delivery/services/streaming-service/cassandra/
 
 backend/streaming-playback-delivery/docker-compose.yml
+
+media/
+*.mp4
+frontend/node_modules/
